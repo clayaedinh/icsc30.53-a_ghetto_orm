@@ -1,6 +1,7 @@
 package orm;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import io.github.lukehutch.fastclasspathscanner.*;
@@ -16,6 +17,7 @@ public class MyORM
 	
 	public void init() throws Exception
 	{
+		System.out.println(this);
 		// scan all mappers -- @MappedClass
 		scanMappers();		
 		
@@ -34,6 +36,7 @@ public class MyORM
 		// then scanMapperHelper()
 		FastClasspathScanner scanner = new FastClasspathScanner("");
 		scanner.matchClassesWithAnnotation(MappedClass.class, c -> scanMapperHelper(c)).scan();
+		System.out.println("Scan Mappers Complete");
 	}
 	
 	//helper function for scanMappers()
@@ -53,6 +56,10 @@ public class MyORM
 
 	private void scanEntities() throws ClassNotFoundException 
 	{
+		FastClasspathScanner scanner = new FastClasspathScanner("");
+		scanner.matchClassesWithAnnotation(Entity.class, c -> scanEntityHelper(c)).scan();
+		System.out.println("Scan Entities Complete");
+		
 		// use FastClasspathScanner to scan the entity package for @Entity
 			// go through each of the fields 
 			// check if there is only 1 field with a Column id attribute
@@ -61,6 +68,22 @@ public class MyORM
 		
 	}
 	
+	private void scanEntityHelper(Class entityClass) {
+		int numColumnIDs = 0;
+		for (Field field : entityClass.getDeclaredFields()) {
+			System.out.println(field.getName());
+			if (field.isAnnotationPresent(Column.class)) {
+				Column c = field.getAnnotation(Column.class);
+				if (c.id() == true) {
+					numColumnIDs++;
+				}
+			}
+		}
+		System.out.println(numColumnIDs);
+		if (numColumnIDs > 1) {
+			throw new RuntimeException("duplicate id=true");
+		}
+	}
 	
 	public Object getMapper(Class clazz)
 	{
