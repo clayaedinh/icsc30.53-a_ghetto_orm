@@ -1,6 +1,12 @@
 package orm;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
+
+import io.github.lukehutch.fastclasspathscanner.*;
+
+import annotations.*;
+import dao.*;
 
 public class MyORM 
 {	
@@ -24,11 +30,24 @@ public class MyORM
 
 	private void scanMappers() throws ClassNotFoundException 
 	{
-		// use FastClasspathScanner to scan the dao package for @MappedClass
-		// check if the clazz has the @Entity annotation
-			// if not throw new RuntimeException("No @Entity")
-		// map the clazz to the mapper class
-
+		// Use FastClasspathScanner to find all classes with MappedClass annotation
+		// then scanMapperHelper()
+		FastClasspathScanner scanner = new FastClasspathScanner("");
+		scanner.matchClassesWithAnnotation(MappedClass.class, c -> scanMapperHelper(c)).scan();
+	}
+	
+	//helper function for scanMappers()
+	// checks if clazz has @Entity
+	// if yes, map clazz to mapper class
+	private void scanMapperHelper(Class interfaceClass) 
+	{
+		MappedClass mappedClass = (MappedClass)interfaceClass.getAnnotation(MappedClass.class);
+		if (mappedClass.clazz().isAnnotationPresent(Entity.class)) {
+			entityToMapperMap.put(mappedClass.clazz(), interfaceClass);
+			System.out.println("Mapped " + mappedClass.clazz().getName() + " to " + interfaceClass.getName());
+		}else {
+			throw new RuntimeException("No @Entity");
+		}	
 	}
 	
 

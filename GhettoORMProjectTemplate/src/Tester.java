@@ -7,13 +7,14 @@ import orm.MyORM;
 public class Tester {
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-
+		
+		
 		MyORM orm = new MyORM();
 		orm.init();
 		
 		StudentMapper sm = (StudentMapper) orm.getMapper(StudentMapper.class);
-		
+
+
 //		for (int i = 0; i<10; i++)
 //		{
 //			Student s = new Student();
