@@ -10,5 +10,4 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface MappedClass {
 	public Class clazz();
-	public String table();
 }
