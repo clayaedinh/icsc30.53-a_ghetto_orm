@@ -35,17 +35,19 @@ public class DaoInvocationHandler implements InvocationHandler {
 			// @Save
 			// @Delete
 			// @Select
+		Object obj = args[0];
+		
 		if (method.isAnnotationPresent(CreateTable.class)) {
 			createTable(method);
 		}		
 		if (method.isAnnotationPresent(Save.class)) {
-
+			save(method, obj);
 		}
 		if (method.isAnnotationPresent(Delete.class)) {
-
+			delete(method, obj);
 		}
 		if (method.isAnnotationPresent(Select.class)) {
-
+			select(method, args);
 		}
 		return null;
 	}
