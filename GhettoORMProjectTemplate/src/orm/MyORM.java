@@ -1,11 +1,10 @@
 package orm;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.lang.annotation.*;
+import java.lang.reflect.*;
 import java.util.HashMap;
 
 import io.github.lukehutch.fastclasspathscanner.*;
-
 import annotations.*;
 import dao.*;
 
@@ -58,20 +57,12 @@ public class MyORM
 	{
 		FastClasspathScanner scanner = new FastClasspathScanner("");
 		scanner.matchClassesWithAnnotation(Entity.class, c -> scanEntityHelper(c)).scan();
-		System.out.println("Scan Entities Complete");
-		
-		// use FastClasspathScanner to scan the entity package for @Entity
-			// go through each of the fields 
-			// check if there is only 1 field with a Column id attribute
-			// if more than one field has id throw new RuntimeException("duplicate id=true")
-		
-		
+		System.out.println("Scan Entities Complete");		
 	}
 	
 	private void scanEntityHelper(Class entityClass) {
 		int numColumnIDs = 0;
 		for (Field field : entityClass.getDeclaredFields()) {
-			System.out.println(field.getName());
 			if (field.isAnnotationPresent(Column.class)) {
 				Column c = field.getAnnotation(Column.class);
 				if (c.id() == true) {
@@ -79,17 +70,16 @@ public class MyORM
 				}
 			}
 		}
-		System.out.println(numColumnIDs);
 		if (numColumnIDs > 1) {
 			throw new RuntimeException("duplicate id=true");
 		}
 	}
-	
+
+	//we couldn't figure this out. just used createTables instead, manually
 	public Object getMapper(Class clazz)
 	{
 		// create the proxy object for the mapper class supplied in clazz parameter
 		// all proxies will use the supplied DaoInvocationHandler as the InvocationHandler
-
 		return null;
 	}
 	
@@ -100,6 +90,13 @@ public class MyORM
 			// create a proxy instance for each
 			// all these proxies can be casted to BasicMapper
 			// run the createTable() method on each of the proxies
+		
+		DaoInvocationHandler handler = new DaoInvocationHandler();
+		StudentMapper studentMapper = (StudentMapper)Proxy.newProxyInstance(StudentMapper.class.getClassLoader(), new Class[]{StudentMapper.class}, handler);
+		SubjectMapper subjectMapper = (SubjectMapper)Proxy.newProxyInstance(SubjectMapper.class.getClassLoader(), new Class[]{SubjectMapper.class}, handler);
+		
+		studentMapper.createTable();
+		subjectMapper.createTable();
 		
 	}
 

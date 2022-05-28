@@ -1,10 +1,12 @@
 package orm;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import annotations.*;
 import realdb.GhettoJdbcBlackBox;
 
 public class DaoInvocationHandler implements InvocationHandler {
@@ -12,8 +14,8 @@ public class DaoInvocationHandler implements InvocationHandler {
 	static GhettoJdbcBlackBox jdbc;
 	
 	public DaoInvocationHandler() {
-		// TODO Auto-generated constructor stub
-		
+		// COMMENTED OUT for now so that the InvocationHandler can be built properly
+		/*
 		if (jdbc==null)
 		{
 			jdbc = new GhettoJdbcBlackBox();
@@ -22,6 +24,7 @@ public class DaoInvocationHandler implements InvocationHandler {
 					  "root", 									// USER NAME
 					  "");										// PASSWORD
 		}
+		*/
 	}
 	
 	@Override
@@ -32,7 +35,18 @@ public class DaoInvocationHandler implements InvocationHandler {
 			// @Save
 			// @Delete
 			// @Select
-			
+		if (method.isAnnotationPresent(CreateTable.class)) {
+			createTable(method);
+		}		
+		if (method.isAnnotationPresent(Save.class)) {
+
+		}
+		if (method.isAnnotationPresent(Delete.class)) {
+
+		}
+		if (method.isAnnotationPresent(Select.class)) {
+
+		}
 		return null;
 	}
 	
@@ -65,9 +79,30 @@ public class DaoInvocationHandler implements InvocationHandler {
 		// use reflection to check all the fields for @Column
 		// use the @Column attributed to generate the required sql statment
 		
+		Class entityClass = method.getDeclaringClass().getAnnotation(MappedClass.class).clazz();
+		Entity entityAnnotation = (Entity)entityClass.getAnnotation(Entity.class);
+		String template = "CREATE TABLE <table_name> (<columns> PRIMARY KEY ( <id> ))";
 		
+		template = template.replaceAll("<table_name>", entityAnnotation.table());
 		
-// 		Run the sql
+		String columns = "";
+		for (Field field: entityClass.getDeclaredFields()) {
+			String column = "<name> <sql_type>, ";
+			if (field.isAnnotationPresent(Column.class)) {
+				Column c = field.getAnnotation(Column.class);
+				column = column.replaceAll("<name>", c.name());
+				column = column.replaceAll("<sql_type>", c.sqlType());
+				if (c.id() == true) {
+					template = template.replaceAll("<id>", c.name());
+				}
+			}
+			columns += column; 
+		}
+		template = template.replaceAll("<columns>", columns);
+		System.out.println(template);
+		
+	
+		// 	Run the sql		
 		// jdbc.runSQL(SQL STRING);
 	}
 	
